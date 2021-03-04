@@ -146,10 +146,10 @@ Horus_code_block_result User_context::handle_read(const Horus_code_block_data *&
         }
         case Next_read_action::Send_data_sensor:
         {
-            std::ifstream _temperature_file(_temperature_file_name_);
-            if (_temperature_file)
+            std::ifstream temperature_file(_temperature_file_name_);
+            if (temperature_file)
             {
-                _temperature_file >> _data_sensor_double_value;
+                temperature_file >> _data_sensor_double_value;
                 _data_sensor_double_value /= 1000.0; // to degrees celcius
             }
             else
