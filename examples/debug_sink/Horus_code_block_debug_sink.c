@@ -1,6 +1,7 @@
-// This file contains an C example implementation of the Horus Code Block C API.
+// This file contains Debug Sink, a C example implementation of the Horus Code
+// Block C API.
 //
-// Copyright (C) 2020 Horus View and Explore B.V.
+// Copyright (C) 2020, 2021 Horus View and Explore B.V.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "../Horus_code_block.h"
+#include "../../Horus_code_block.h"
 
 #include <assert.h>
 #include <stdbool.h>
@@ -226,6 +227,7 @@ static bool context_in_and_user_context_in_and_data_in_are_valid(
         case Horus_code_block_data_type_video_fourcc_in:
         case Horus_code_block_data_type_ptz_stop:
         case Horus_code_block_data_type_ptz_button:
+        case Horus_code_block_data_type_ptz_orientation_rpy:
         case Horus_code_block_data_type_sensor:
         {
             if (data->contents == NULL)
@@ -365,14 +367,15 @@ static bool data_ptz_button_is_valid(
     return true;
 }
 
-static bool data_sensor_is_valid(
+static bool unit_is_valid(
     const char *const function_name,
-    const struct Horus_code_block_data_sensor *const data_sensor)
+    const Horus_code_block_unit *const unit,
+    const char *const error_message)
 {
-    assert((function_name != NULL) && (data_sensor != NULL));
-    if (data_sensor->unit != NULL)
+    assert((function_name != NULL) && (error_message != NULL));
+    if (unit != NULL)
     {
-        switch (*data_sensor->unit)
+        switch (*unit)
         {
             case Horus_code_block_unit_unknown_unit:
             case Horus_code_block_unit_unknown:
@@ -416,6 +419,41 @@ static bool data_sensor_is_valid(
                 printf(_error_format_, function_name, "*data_sensor->unit invalid");
                 return false;
         }
+    }
+    return true;
+}
+
+static bool data_ptz_orientation_rpy_is_valid(
+    const char *const function_name,
+    const struct Horus_code_block_data_ptz_orientation_rpy *const data_ptz_orientation_rpy)
+{
+    assert((function_name != NULL) && (data_ptz_orientation_rpy != NULL));
+    if (!unit_is_valid(
+            function_name,
+            data_ptz_orientation_rpy->roll_unit,
+            "*data_ptz_orientation_rpy->roll_unit invalid") ||
+        !unit_is_valid(
+            function_name,
+            data_ptz_orientation_rpy->pitch_unit,
+            "*data_ptz_orientation_rpy->pitch_unit invalid") ||
+        !unit_is_valid(
+            function_name,
+            data_ptz_orientation_rpy->yaw_unit,
+            "*data_ptz_orientation_rpy->yaw_unit invalid"))
+    {
+        return false;
+    }
+    return true;
+}
+
+static bool data_sensor_is_valid(
+    const char *const function_name,
+    const struct Horus_code_block_data_sensor *const data_sensor)
+{
+    assert((function_name != NULL) && (data_sensor != NULL));
+    if (!unit_is_valid(function_name, data_sensor->unit, "*data_sensor->unit invalid"))
+    {
+        return false;
     }
     switch (data_sensor->data)
     {
@@ -712,6 +750,9 @@ print_data_type(const char *const function_name, const Horus_code_block_data_typ
         case Horus_code_block_data_type_ptz_button:
             printf(format, function_name, "ptz_button");
             break;
+        case Horus_code_block_data_type_ptz_orientation_rpy:
+            printf(format, function_name, "ptz_orientation_rpy");
+            break;
         case Horus_code_block_data_type_sensor:
             printf(format, function_name, "sensor");
             break;
@@ -872,6 +913,149 @@ static void print_data_ptz_button(
     puts("}");
 }
 
+static void print_unit(const Horus_code_block_unit *const unit, const char *const unit_name)
+{
+    assert(unit_name != NULL);
+    if (unit != NULL)
+    {
+        switch (*unit)
+        {
+            case Horus_code_block_unit_unknown_unit:
+                printf("  %s = unknown_unit\n", unit_name);
+                break;
+            case Horus_code_block_unit_unknown:
+                printf("  %s = unknown\n", unit_name);
+                break;
+            case Horus_code_block_unit_degree:
+                printf("  %s = degree\n", unit_name);
+                break;
+            case Horus_code_block_unit_radian:
+                printf("  %s = radian\n", unit_name);
+                break;
+            case Horus_code_block_unit_celcius:
+                printf("  %s = celcius\n", unit_name);
+                break;
+            case Horus_code_block_unit_normalized:
+                printf("  %s = normalized\n", unit_name);
+                break;
+            case Horus_code_block_unit_degree_sec:
+                printf("  %s = degree_sec\n", unit_name);
+                break;
+            case Horus_code_block_unit_radian_sec:
+                printf("  %s = radian_sec\n", unit_name);
+                break;
+            case Horus_code_block_unit_g:
+                printf("  %s = g\n", unit_name);
+                break;
+            case Horus_code_block_unit_gauss:
+                printf("  %s = gauss\n", unit_name);
+                break;
+            case Horus_code_block_unit_percentage:
+                printf("  %s = percentage\n", unit_name);
+                break;
+            case Horus_code_block_unit_v:
+                printf("  %s = v\n", unit_name);
+                break;
+            case Horus_code_block_unit_w:
+                printf("  %s = w\n", unit_name);
+                break;
+            case Horus_code_block_unit_a:
+                printf("  %s = a\n", unit_name);
+                break;
+            case Horus_code_block_unit_b:
+                printf("  %s = b\n", unit_name);
+                break;
+            case Horus_code_block_unit_quaternion:
+                printf("  %s = quaternion\n", unit_name);
+                break;
+            case Horus_code_block_unit_mm:
+                printf("  %s = mm\n", unit_name);
+                break;
+            case Horus_code_block_unit_m:
+                printf("  %s = m\n", unit_name);
+                break;
+            case Horus_code_block_unit_km:
+                printf("  %s = km\n", unit_name);
+                break;
+            case Horus_code_block_unit_m_sec:
+                printf("  %s = m_sec\n", unit_name);
+                break;
+            case Horus_code_block_unit_kmph:
+                printf("  %s = kmph\n", unit_name);
+                break;
+            case Horus_code_block_unit_bpm:
+                printf("  %s = bpm\n", unit_name);
+                break;
+            case Horus_code_block_unit_px:
+                printf("  %s = px\n", unit_name);
+                break;
+            case Horus_code_block_unit_usec:
+                printf("  %s = usec\n", unit_name);
+                break;
+            case Horus_code_block_unit_kg:
+                printf("  %s = kg\n", unit_name);
+                break;
+            case Horus_code_block_unit_mbar:
+                printf("  %s = mbar\n", unit_name);
+                break;
+            case Horus_code_block_unit_rpm:
+                printf("  %s = rpm\n", unit_name);
+                break;
+            case Horus_code_block_unit_mhz:
+                printf("  %s = mhz\n", unit_name);
+                break;
+            case Horus_code_block_unit_gb:
+                printf("  %s = gb\n", unit_name);
+                break;
+            case Horus_code_block_unit_ah:
+                printf("  %s = ah\n", unit_name);
+                break;
+            case Horus_code_block_unit_pa:
+                printf("  %s = pa\n", unit_name);
+                break;
+            case Horus_code_block_unit_kpa:
+                printf("  %s = kpa\n", unit_name);
+                break;
+            case Horus_code_block_unit_grams_sec:
+                printf("  %s = grams_sec\n", unit_name);
+                break;
+            case Horus_code_block_unit_fuel_air_ratio:
+                printf("  %s = fuel_air_ratio\n", unit_name);
+                break;
+            case Horus_code_block_unit_l_hour:
+                printf("  %s = l_hour\n", unit_name);
+                break;
+            case Horus_code_block_unit_sec:
+                printf("  %s = sec\n", unit_name);
+                break;
+            case Horus_code_block_unit_minute:
+                printf("  %s = minute\n", unit_name);
+                break;
+            default:
+                assert(false);
+        }
+    }
+}
+
+static void print_data_ptz_orientation_rpy(
+    const char *const function_name,
+    const struct Horus_code_block_data_ptz_orientation_rpy *const data_ptz_orientation_rpy)
+{
+    assert((function_name != NULL) && (data_ptz_orientation_rpy != NULL));
+    printf("%s: data_ptz_orientation_rpy = {\n", function_name);
+    if (data_ptz_orientation_rpy->id != NULL)
+    {
+        printf("  id = %s\n", data_ptz_orientation_rpy->id);
+    }
+    printf("  roll = %f\n", data_ptz_orientation_rpy->roll);
+    print_unit(data_ptz_orientation_rpy->roll_unit, "roll_unit");
+    printf("  pitch = %f\n", data_ptz_orientation_rpy->pitch);
+    print_unit(data_ptz_orientation_rpy->pitch_unit, "pitch_unit");
+    printf("  yaw = %f\n", data_ptz_orientation_rpy->yaw);
+    print_unit(data_ptz_orientation_rpy->yaw_unit, "yaw_unit");
+    puts("}");
+}
+
 static void print_data_sensor(
     const char *const function_name,
     const struct Horus_code_block_data_sensor *const data_sensor)
@@ -882,125 +1066,7 @@ static void print_data_sensor(
     {
         printf("  name = %s\n", data_sensor->name);
     }
-    if (data_sensor->unit != NULL)
-    {
-        switch (*data_sensor->unit)
-        {
-            case Horus_code_block_unit_unknown_unit:
-                puts("  unit = unknown_unit");
-                break;
-            case Horus_code_block_unit_unknown:
-                puts("  unit = unknown");
-                break;
-            case Horus_code_block_unit_degree:
-                puts("  unit = degree");
-                break;
-            case Horus_code_block_unit_radian:
-                puts("  unit = radian");
-                break;
-            case Horus_code_block_unit_celcius:
-                puts("  unit = celcius");
-                break;
-            case Horus_code_block_unit_normalized:
-                puts("  unit = normalized");
-                break;
-            case Horus_code_block_unit_degree_sec:
-                puts("  unit = degree_sec");
-                break;
-            case Horus_code_block_unit_radian_sec:
-                puts("  unit = radian_sec");
-                break;
-            case Horus_code_block_unit_g:
-                puts("  unit = g");
-                break;
-            case Horus_code_block_unit_gauss:
-                puts("  unit = gauss");
-                break;
-            case Horus_code_block_unit_percentage:
-                puts("  unit = percentage");
-                break;
-            case Horus_code_block_unit_v:
-                puts("  unit = v");
-                break;
-            case Horus_code_block_unit_w:
-                puts("  unit = w");
-                break;
-            case Horus_code_block_unit_a:
-                puts("  unit = a");
-                break;
-            case Horus_code_block_unit_b:
-                puts("  unit = b");
-                break;
-            case Horus_code_block_unit_quaternion:
-                puts("  unit = quaternion");
-                break;
-            case Horus_code_block_unit_mm:
-                puts("  unit = mm");
-                break;
-            case Horus_code_block_unit_m:
-                puts("  unit = m");
-                break;
-            case Horus_code_block_unit_km:
-                puts("  unit = km");
-                break;
-            case Horus_code_block_unit_m_sec:
-                puts("  unit = m_sec");
-                break;
-            case Horus_code_block_unit_kmph:
-                puts("  unit = kmph");
-                break;
-            case Horus_code_block_unit_bpm:
-                puts("  unit = bpm");
-                break;
-            case Horus_code_block_unit_px:
-                puts("  unit = px");
-                break;
-            case Horus_code_block_unit_usec:
-                puts("  unit = usec");
-                break;
-            case Horus_code_block_unit_kg:
-                puts("  unit = kg");
-                break;
-            case Horus_code_block_unit_mbar:
-                puts("  unit = mbar");
-                break;
-            case Horus_code_block_unit_rpm:
-                puts("  unit = rpm");
-                break;
-            case Horus_code_block_unit_mhz:
-                puts("  unit = mhz");
-                break;
-            case Horus_code_block_unit_gb:
-                puts("  unit = gb");
-                break;
-            case Horus_code_block_unit_ah:
-                puts("  unit = ah");
-                break;
-            case Horus_code_block_unit_pa:
-                puts("  unit = pa");
-                break;
-            case Horus_code_block_unit_kpa:
-                puts("  unit = kpa");
-                break;
-            case Horus_code_block_unit_grams_sec:
-                puts("  unit = grams_sec");
-                break;
-            case Horus_code_block_unit_fuel_air_ratio:
-                puts("  unit = fuel_air_ratio");
-                break;
-            case Horus_code_block_unit_l_hour:
-                puts("  unit = l_hour");
-                break;
-            case Horus_code_block_unit_sec:
-                puts("  unit = sec");
-                break;
-            case Horus_code_block_unit_minute:
-                puts("  unit = minute");
-                break;
-            default:
-                assert(false);
-        }
-    }
+    print_unit(data_sensor->unit, "unit");
     switch (data_sensor->data)
     {
         case Horus_code_block_sensor_data_string:
@@ -1402,6 +1468,7 @@ Horus_code_block_result horus_code_block_write(
         case Horus_code_block_data_type_video_fourcc_in:
         case Horus_code_block_data_type_ptz_stop:
         case Horus_code_block_data_type_ptz_button:
+        case Horus_code_block_data_type_ptz_orientation_rpy:
         case Horus_code_block_data_type_sensor:
         {
             const bool expect_running = true;
@@ -1469,6 +1536,15 @@ Horus_code_block_result horus_code_block_write(
             assert(data->contents != NULL);
             if (!data_ptz_button_is_valid(
                     function_name, (const struct Horus_code_block_data_ptz_button *)data->contents))
+            {
+                return Horus_code_block_error;
+            }
+            break;
+        case Horus_code_block_data_type_ptz_orientation_rpy:
+            assert(data->contents != NULL);
+            if (!data_ptz_orientation_rpy_is_valid(
+                    function_name,
+                    (const struct Horus_code_block_data_ptz_orientation_rpy *)data->contents))
             {
                 return Horus_code_block_error;
             }
@@ -1574,6 +1650,19 @@ Horus_code_block_result horus_code_block_write(
             {
                 print_data_ptz_button(
                     function_name, (const struct Horus_code_block_data_ptz_button *)data->contents);
+            }
+            else
+            {
+                print_data_type(function_name, data->type);
+            }
+            break;
+        case Horus_code_block_data_type_ptz_orientation_rpy:
+            assert(data->contents != NULL);
+            if (user_context->print_data_contents_on_write)
+            {
+                print_data_ptz_orientation_rpy(
+                    function_name,
+                    (const struct Horus_code_block_data_ptz_orientation_rpy *)data->contents);
             }
             else
             {

@@ -7,10 +7,34 @@ System V2](https://horus.nu/horus-inside/) component by loading that shared
 library into the Horus Code Block component.  You can find more information in
 the header file [Horus_code_block.h](Horus_code_block.h) itself.
 
-The directories [c_example](c_example/) and [cpp_examples](cpp_examples/)
-contain example implementations of the Horus Code Block C API.
-[cpp_examples/Horus_code_block_cpu_temperature.cpp](cpp_examples/Horus_code_block_cpu_temperature.cpp)
-is a good place to start.
+## Examples
+
+The directory [examples](examples/) contains a number of subdirectories with
+CMake-based example implementations of the Horus Code Block C API.
+
+[PTZ Orientation RPY Eight
+Sectors](examples/ptz_orientation_rpy_eight_sectors/Horus_code_block_ptz_orientation_rpy_eight_sectors.cpp)
+is a good place to start.  It is a simple example using C++ that receives PTZ
+roll-pitch-yaw orientations and sends the sector number of that orientation as
+sensor data.
+
+[CPU Temperature](examples/cpu_temperature/Horus_code_block_cpu_temperature.cpp)
+is another simple example using C++.  On Linux, it produces CPU temperature
+readings as sensor data.
+
+[Debug Sink](examples/debug_sink/Horus_code_block_debug_sink.c) is an elaborate
+example in pure C that prints information on the shared library calls.  You can
+use it to let a Code Block component print all Horus Code Block supported data
+structures produced for incoming messages.
+
+[Framework](examples/framework/) is an elaborate example that presents a small
+C++ framework to implement the Code Block C API as well as two exmples that use
+this framework.  [Debug
+Source](examples/framework/Horus_code_block_debug_source.cpp) produces various
+types of output messages.  [LSB
+Eraser](examples/framework/Horus_code_block_lsb_eraser.cpp) demonstrates buffer
+manipulation by erasing the four least significant bits of raw video buffer
+bytes of input messages.
 
 ## Building for an embedded device
 

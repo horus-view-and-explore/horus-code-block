@@ -1,6 +1,6 @@
 // This file contains the Horus Code Block C API.
 //
-// Copyright (C) 2020 Horus View and Explore B.V.
+// Copyright (C) 2020, 2021 Horus View and Explore B.V.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -292,6 +292,7 @@ enum Horus_code_block_data_type_enum
     /// Horus_code_block_data_grabber_utc_timestamp
     Horus_code_block_data_type_grabber_utc_timestamp = 8,
     /// Horus_code_block_data_ascii_in (write only)
+
     Horus_code_block_data_type_ascii_in = 9,
     /// Horus_code_block_data_ascii_out (read_only, with buffer request)
     Horus_code_block_data_type_ascii_out = 10,
@@ -299,10 +300,14 @@ enum Horus_code_block_data_type_enum
     Horus_code_block_data_type_video_fourcc_in = 11,
     /// Horus_code_block_data_video_fourcc_out (read_only, with buffer request)
     Horus_code_block_data_type_video_fourcc_out = 12,
+
     /// Horus_code_block_data_ptz_stop
     Horus_code_block_data_type_ptz_stop = 13,
     /// Horus_code_block_data_ptz_button
     Horus_code_block_data_type_ptz_button = 14,
+    /// Horus_code_block_data_ptz_orientation_rpy
+    Horus_code_block_data_type_ptz_orientation_rpy = 17,
+
     /// Horus_code_block_data_sensor
     Horus_code_block_data_type_sensor = 15,
 
@@ -512,7 +517,7 @@ struct Horus_code_block_data_ptz_stop
     /// A null-terminated string.  May be NULL.
     const char *id;
 
-    const bool stop;
+    bool stop;
 };
 
 /// Horus_code_block_data_type_ptz_button
@@ -566,6 +571,28 @@ enum Horus_code_block_unit_enum
     Horus_code_block_unit_minute = 63          ///< Minutes
 };
 typedef int Horus_code_block_unit;
+
+/// Horus_code_block_data_type_ptz_orientation_rpy
+struct Horus_code_block_data_ptz_orientation_rpy
+{
+    /// A null-terminated string.  May be NULL.
+    const char *id;
+
+    double roll;
+
+    /// May be NULL.
+    const Horus_code_block_unit *roll_unit;
+
+    double pitch;
+
+    /// May be NULL.
+    const Horus_code_block_unit *pitch_unit;
+
+    double yaw;
+
+    /// May be NULL.
+    const Horus_code_block_unit *yaw_unit;
+};
 
 enum Horus_code_block_sensor_data_enum
 {

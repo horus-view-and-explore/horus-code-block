@@ -1,6 +1,6 @@
 // This file is part of the C++ example implementations of the Horus Code Block C API.
 //
-// Copyright (C) 2020 Horus View and Explore B.V.
+// Copyright (C) 2020, 2021 Horus View and Explore B.V.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
 #ifndef HORUS_CODE_BLOCK_USER_CONTEXT_BASE_HPP
 #define HORUS_CODE_BLOCK_USER_CONTEXT_BASE_HPP
 
-#include "../Horus_code_block.h"
+#include "../../Horus_code_block.h"
 
 #include <memory>
 #include <queue>
@@ -92,6 +92,9 @@ class Horus_code_block_user_context_base
 
     struct Horus_code_block_data *
     get_data(const struct Horus_code_block_data_video_fourcc_out &data_video_fourcc_out);
+
+    struct Horus_code_block_data *
+    get_data(const struct Horus_code_block_data_ptz_orientation_rpy &data_ptz_orientation_rpy);
 
     struct Horus_code_block_data *get_data(const struct Horus_code_block_data_sensor &data_sensor);
 

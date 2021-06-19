@@ -1,6 +1,6 @@
 // This file is part of the C++ example implementations of the Horus Code Block C API.
 //
-// Copyright (C) 2020 Horus View and Explore B.V.
+// Copyright (C) 2020, 2021 Horus View and Explore B.V.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "../Horus_code_block.h"
+#include "../../Horus_code_block.h"
 
 #include "Horus_code_block_output_message_base.hpp"
 #include "Horus_code_block_user_context_base.hpp"

@@ -1,6 +1,6 @@
 // This file is part of the C++ example implementations of the Horus Code Block C API.
 //
-// Copyright (C) 2020 Horus View and Explore B.V.
+// Copyright (C) 2020, 2021 Horus View and Explore B.V.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -147,6 +147,14 @@ struct Horus_code_block_data *Horus_code_block_user_context_base::get_data(
     return &_data;
 }
 
+struct Horus_code_block_data *Horus_code_block_user_context_base::get_data(
+    const struct Horus_code_block_data_ptz_orientation_rpy &data_ptz_orientation_rpy)
+{
+    _data.type = Horus_code_block_data_type_ptz_orientation_rpy;
+    _data.contents = &data_ptz_orientation_rpy;
+    return &_data;
+}
+
 struct Horus_code_block_data *
 Horus_code_block_user_context_base::get_data(const struct Horus_code_block_data_sensor &data_sensor)
 {
@@ -200,8 +208,8 @@ void Horus_code_block_user_context_base::push_subscriptions(
     std::set<Horus_code_block_data_type> input_message_data_type_subscription_set)
 {
     assert(!input_pipe_set.empty());
-    _subscriptions_queue.push(Subscriptions{std::move(input_pipe_set),
-                                            std::move(input_message_data_type_subscription_set)});
+    _subscriptions_queue.push(Subscriptions{
+        std::move(input_pipe_set), std::move(input_message_data_type_subscription_set)});
 }
 
 struct Horus_code_block_data *Horus_code_block_user_context_base::pop_subscriptions()
