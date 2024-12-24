@@ -312,7 +312,10 @@ enum Horus_code_block_data_type_enum
     Horus_code_block_data_type_sensor = 15,
 
     /// Horus_code_block_data_buffer (write_only, reply to buffer request)
-    Horus_code_block_data_type_buffer = 16
+    Horus_code_block_data_type_buffer = 16,
+
+    // Horus Nvidia / Cuda extensions
+    Horus_cuda_code_block_buffer_info = 100
 };
 typedef int Horus_code_block_data_type;
 

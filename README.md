@@ -36,6 +36,8 @@ Eraser](examples/framework/Horus_code_block_lsb_eraser.cpp) demonstrates buffer
 manipulation by erasing the four least significant bits of raw video buffer
 bytes of input messages.
 
+[Cuda](examples/cuda/) contains examples on how to use Horus Cuda Code Block.
+
 ## Building for an embedded device
 
 In order to build a Code Block shared library for your embedded device, the
