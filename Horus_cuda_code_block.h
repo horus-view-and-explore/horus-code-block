@@ -9,6 +9,8 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
+#include <iostream>
+
 /// Version of this Horus Code Block C API.
 #define HORUS_CUDA_CODE_BLOCK_VERSION 0u
 
@@ -70,7 +72,77 @@ struct Horus_cuda_code_block_data_buffer
                               // on a specific input buffer multiple buffer done flags can be set.
 
     // Cuda types
-    cudaStream_t cuda_stream; // runn jobs on this streams
+    cudaStream_t cuda_stream; // runn jobs on this stream
 };
+
+inline bool Horus_cuda_code_block_memcpy_async(
+    void *&mem,
+    void *data,
+    size_t size,
+    cudaStream_t &cuda_stream,
+    cudaMemcpyKind kind)
+{
+    switch (kind)
+    {
+        case cudaMemcpyKind::cudaMemcpyHostToDevice:
+            cudaMemcpyAsync(mem, data, size, cudaMemcpyHostToDevice, cuda_stream);
+            break;
+
+        case cudaMemcpyKind::cudaMemcpyDeviceToHost:
+            cudaMemcpyAsync(data, mem, size, cudaMemcpyDeviceToHost, cuda_stream);
+        default:
+        {
+        }
+        break;
+    }
+
+    cudaStreamSynchronize(cuda_stream);
+    return cudaGetLastError() == cudaSuccess;
+}
+
+inline bool Horus_cuda_code_block_memcpy_chars(
+    void *&mem,
+    void *data,
+    size_t size,
+    cudaStream_t &cuda_stream,
+    cudaMemcpyKind kind)
+{
+    return Horus_cuda_code_block_memcpy_async(mem, data, size, cuda_stream, kind);
+}
+
+inline bool Horus_cuda_code_block_memcpy_floats(
+    void *&mem,
+    void *data,
+    size_t size,
+    cudaStream_t &cuda_stream,
+    cudaMemcpyKind kind)
+{
+    return Horus_cuda_code_block_memcpy_async(mem, data, size * sizeof(float), cuda_stream, kind);
+}
+
+inline void Horus_cuda_code_block_show_error(const char *info)
+{
+    std::cout << "Info: " << info << std::endl;
+    std::cout << "Nr:   " << cudaPeekAtLastError() << std::endl;
+    std::cout << cudaGetErrorString(cudaGetLastError()) << std::endl;
+}
+
+inline void Horus_cuda_code_block_synchronize(cudaStream_t stream, const char *info)
+{
+    if (cudaPeekAtLastError() != cudaSuccess)
+    {
+        Horus_cuda_code_block_show_error("PRE SYNC");
+        Horus_cuda_code_block_show_error(info);
+        exit(1);
+    }
+
+    cudaStreamSynchronize(stream);
+
+    if (cudaPeekAtLastError() != cudaSuccess)
+    {
+        Horus_cuda_code_block_show_error(info);
+        exit(1);
+    }
+}
 
 #endif // HORUS_CUDA_CODE_BLOCK_H

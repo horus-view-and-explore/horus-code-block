@@ -1,25 +1,22 @@
-# Horus Cuda Code Block
+# Horus CUDA Code Block
+The Horus CUDA Code Block extends CUDA programming capabilities to the base Horus Code Block system. Developers need to include both `Horus_code_block.h` and `Horus_cuda_code_block.h` header files to use this functionality.
 
-The `Horus_cuda_code_block` offers `cuda` programming support for the
-`Horus_code_block`. In addition to the regular `Horus_code_block.h`
-header file the programmer requires the `Horus_cuda_code_block.h`
-header.
+## Examples
 
-## Example 1: Video Test Source Generator
+### 1. Video Test Source Generator
+Demonstrates basic single-buffer video manipulation.
 
-Manipulation of single buffer.
+### 2. Enhanced Video Processing with Flip
+Builds on Example 1 by implementing a dual-buffer approach for video manipulation, adding flip functionality.
 
-## Example 2: Adding an additinoal Video Flip to example 1
+### 3. TensorRT Scale Layer
+Shows how to create a TensorRT network with a Scale layer that transforms input video using the formula:
+```
+output = (input * scale + shift)^(power)
+```
 
-Using a two-buffer approach for video manipulation.
-
-
-
-
-
-
-
-
-
-
-
+### 4. TensorRT-Based Image Segmentation
+Demonstrates image segmentation using TensorRT with these key features:
+- Loads a pre-trained ResNet101_DUC_HDC model from ONNX format
+- Performs image segmentation on the input
+- Generates an overlay of the segmentation results
