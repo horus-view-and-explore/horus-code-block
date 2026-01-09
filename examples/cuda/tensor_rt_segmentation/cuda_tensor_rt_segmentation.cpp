@@ -36,6 +36,8 @@
 #include "Transforms.hpp"    // Generate mapping from network tensor to image
 
 #include <cstring>
+#include <filesystem>
+#include <fstream>
 #include <memory>
 #include <ostream>
 #include <sstream>
@@ -265,6 +267,49 @@ void convert_output(User_context *ctx)
     }
 }
 
+bool loadTensorRTModel(User_context *ctx, const std::string &modelPath, int batchSize)
+{
+    hrs::TRTUniquePtr<nvinfer1::IRuntime> runtime(nvinfer1::createInferRuntime(hrs::logger));
+    if (!runtime)
+    {
+        return false;
+    }
+
+    // Use the Deep Learning Accelerator
+    runtime->setDLACore(0);
+
+    std::ifstream modelFile(modelPath, std::ios::binary | std::ios::ate);
+    if (!modelFile.good())
+    {
+        return false;
+    }
+
+    size_t size = modelFile.tellg();
+    modelFile.seekg(0, std::ios::beg);
+    std::vector<char> serializedEngine(size);
+    modelFile.read(serializedEngine.data(), size);
+    modelFile.close();
+
+    nvinfer1::ICudaEngine *engine = runtime->deserializeCudaEngine(serializedEngine.data(), size);
+    if (!engine)
+    {
+        return false;
+    }
+
+    hrs::TRTUniquePtr<nvinfer1::IExecutionContext> context(engine->createExecutionContext());
+    if (!context)
+    {
+        return false;
+    }
+
+    // ctx->network.serialized_engine = std::move(serializedEngine);
+    ctx->network.engine = engine;
+    ctx->network.runtime = std::move(runtime);
+    ctx->network.context = std::move(context);
+
+    return true;
+}
+
 bool loadOnnxModel(User_context *ctx, const std::string &modelPath, int batchSize)
 {
 
@@ -299,6 +344,13 @@ bool loadOnnxModel(User_context *ctx, const std::string &modelPath, int batchSiz
     if (!config)
         return false;
 
+    // Configure the DLA
+    config->setDLACore(0);
+    // DLA requires FP16 or INT8
+    config->setFlag(nvinfer1::BuilderFlag::kFP16);
+    // Use GPU as fallback
+    config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
+
     // Set max workspace size (1GB)
     // config->setMaxWorkspaceSize(1ULL << 30);
 
@@ -312,6 +364,9 @@ bool loadOnnxModel(User_context *ctx, const std::string &modelPath, int batchSiz
     hrs::TRTUniquePtr<nvinfer1::IRuntime> runtime(nvinfer1::createInferRuntime(hrs::logger));
     if (!runtime)
         return false;
+
+    // Needs to match the config above
+    runtime->setDLACore(0);
 
     nvinfer1::ICudaEngine *engine =
         runtime->deserializeCudaEngine(serializedEngine->data(), serializedEngine->size());
@@ -456,11 +511,29 @@ void init_tensor_rt(User_context *ctx)
 {
     std::cout << " *** init_tensor_rt *** " << std::endl;
 
-    if (!loadOnnxModel(ctx, ctx->path, 1))
+    std::filesystem::path modelPath(ctx->path);
+    if (modelPath.extension() == ".onnx")
     {
-        std::cout << "could not load onnx model" << std::endl;
-        exit(1);
+
+        if (!loadOnnxModel(ctx, ctx->path, 1))
+        {
+            std::cout << "could not load onnx model" << std::endl;
+            exit(1);
+        }
     }
+    else if (modelPath.extension() == ".engine")
+    {
+        if (!loadTensorRTModel(ctx, ctx->path, 1))
+        {
+            std::cout << "could not load TensorRT model" << std::endl;
+            exit(1);
+        }
+    }
+    else
+    {
+        std::cout << "unsupported model type: " << modelPath.extension() << std::endl;
+    }
+
     if (!generate_buffers(ctx))
     {
         std::cout << "could not load onnx model" << std::endl;

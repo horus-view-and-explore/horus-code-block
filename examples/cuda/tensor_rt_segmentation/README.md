@@ -32,7 +32,20 @@ bool loadOnnxModel(...)
    ...
 }
 ```
-Will load and create the TensorRT newtork.
+Will load and create the TensorRT network.
+
+#### Improve startup performance
+
+The `ONNX` model can be serialized to TensorRT format beforehand. This significantly improves 
+startup times. To do this, you need the [trtexec](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/command-line-programs.html#trtexec)
+command line program. This is part of the TensorRT package. To serialize an `ONNX` model, execute
+the following command:
+
+```bash
+$ trtexec --onnx=model.onnx --saveEngine=model.engine --fp16 --useDLACore=0 --allowGPUFallback
+```
+
+Then specify the path to `model.engine` in place of the `.onnx` file. 
 
 ### Cuda Buffer management
 `Horus_cuda.hpp` provides the following class:
