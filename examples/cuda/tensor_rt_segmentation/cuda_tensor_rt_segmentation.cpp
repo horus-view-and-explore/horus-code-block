@@ -275,9 +275,6 @@ bool loadTensorRTModel(User_context *ctx, const std::string &modelPath, int batc
         return false;
     }
 
-    // Use the Deep Learning Accelerator
-    runtime->setDLACore(0);
-
     std::ifstream modelFile(modelPath, std::ios::binary | std::ios::ate);
     if (!modelFile.good())
     {
@@ -344,13 +341,6 @@ bool loadOnnxModel(User_context *ctx, const std::string &modelPath, int batchSiz
     if (!config)
         return false;
 
-    // Configure the DLA
-    config->setDLACore(0);
-    // DLA requires FP16 or INT8
-    config->setFlag(nvinfer1::BuilderFlag::kFP16);
-    // Use GPU as fallback
-    config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
-
     // Set max workspace size (1GB)
     // config->setMaxWorkspaceSize(1ULL << 30);
 
@@ -364,9 +354,6 @@ bool loadOnnxModel(User_context *ctx, const std::string &modelPath, int batchSiz
     hrs::TRTUniquePtr<nvinfer1::IRuntime> runtime(nvinfer1::createInferRuntime(hrs::logger));
     if (!runtime)
         return false;
-
-    // Needs to match the config above
-    runtime->setDLACore(0);
 
     nvinfer1::ICudaEngine *engine =
         runtime->deserializeCudaEngine(serializedEngine->data(), serializedEngine->size());
